@@ -1,0 +1,64 @@
+<h2>Quản lý người dùng</h2>
+
+<form #form="ngForm" (ngSubmit)="submit(form)">
+    <div>
+        <label>Name</label>
+        <input type="text" name="name" [(ngModel)]="userForm.name" #name="ngModel" required minlength="2" />
+        <small *ngIf="name.invalid && name.touched">
+            Name phải có ít nhất 2 ký tự
+        </small>
+    </div>
+
+    <div>
+        <label>Email</label>
+        <input type="email" name="email" [(ngModel)]="userForm.email" #email="ngModel" required email />
+        <small *ngIf="email.invalid && email.touched">
+            Email không hợp lệ
+        </small>
+    </div>
+
+    <div>
+        <label>Role</label>
+        <input type="text" name="role" [(ngModel)]="userForm.role" #role="ngModel" required minlength="2" />
+        <small *ngIf="role.invalid && role.touched">
+            Role không được để trống
+        </small>
+    </div>
+
+    <button type="submit" [disabled]="form.invalid || submitting">
+        {{ submitting ? 'Đang xử lý...' : (editingId ? 'Cập nhật User' : 'Tạo User') }}
+    </button>
+
+    <button type="button" (click)="resetForm(form)">Reset</button>
+</form>
+
+<p *ngIf="successMessage">{{ successMessage }}</p>
+<p *ngIf="errorMessage">{{ errorMessage }}</p>
+
+<p *ngIf="loading">Đang tải danh sách user...</p>
+
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr *ngFor="let user of users">
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>
+                <button (click)="edit(user)">Edit</button>
+                <button (click)="delete(user.id)">Delete</button>
+                <button [routerLink]="['/tasks']" [queryParams]="{ userId: user.id }">
+                    View Tasks
+                </button>
+            </td>
+        </tr>
+    </tbody>
+</table>

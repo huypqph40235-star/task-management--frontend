@@ -1,0 +1,17 @@
+<div class="detail-page">
+  <div class="detail-header">
+    <h2>Task Detail</h2>
+    <a class="back-link" routerLink="/tasks">Back to Task List</a>
+  </div>
+
+  <div *ngIf="loading" class="loading">Đang tải dữ liệu...</div>
+
+  <div *ngIf="!loading && task" class="detail-card">
+    <div class="detail-row"><strong>Title</strong><span>{{ task.title }}</span></div>
+    <div class="detail-row"><strong>Description</strong><span>{{ task.description || 'No description' }}</span></div>
+    <div class="detail-row"><strong>Status</strong><span>{{ task.status }}</span></div>
+    <div class="detail-row"><strong>Priority</strong><span>{{ task.priority }}</span></div>
+    <div class="detail-row"><strong>Due Date</strong><span>{{ task.dueDate || '-' }}</span></div>
+    <div class="detail-row"><strong>Assigned User</strong><span>{{ assignedUserName }}</span></div>
+  </div>
+</div>

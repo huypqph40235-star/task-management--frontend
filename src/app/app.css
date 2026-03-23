@@ -1,0 +1,24 @@
+.nav-basic {
+    padding: 10px 0;
+    margin-bottom: 20px;
+}
+
+.nav-basic a {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 6px 12px;
+    text-decoration: none;
+    color: #000;
+    background: #f2f2f2;
+    border: 1px solid #999;
+    border-radius: 0;
+    font-size: 14px;
+}
+
+.nav-basic a:hover {
+    background: #e9e9e9;
+}
+
+.nav-basic .active-link {
+    font-weight: bold;
+}

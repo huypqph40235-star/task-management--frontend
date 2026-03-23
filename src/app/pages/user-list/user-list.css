@@ -1,0 +1,20 @@
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.row {
+    display: block;
+}
+
+.card,
+.panel,
+.filter-box,
+.form-box {
+    border: none;
+    padding: 0;
+    margin-bottom: 20px;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
