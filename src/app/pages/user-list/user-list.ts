@@ -59,6 +59,7 @@ export class UserListComponent implements OnInit {
   submit(form: NgForm): void {
     if (form.invalid || this.submitting) {
       form.control.markAllAsTouched();
+      this.cdr.detectChanges();
       return;
     }
 

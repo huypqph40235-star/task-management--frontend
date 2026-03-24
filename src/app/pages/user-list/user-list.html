@@ -12,13 +12,36 @@
 
     <form #userNgForm="ngForm" (ngSubmit)="submit(userNgForm)">
         <div class="form-grid">
-            <input type="text" name="name" placeholder="Name" [(ngModel)]="userForm.name" required />
-            <input type="email" name="email" placeholder="Email" [(ngModel)]="userForm.email" required />
-            <input type="text" name="role" placeholder="Role" [(ngModel)]="userForm.role" required />
+            <div>
+                <input type="text" name="name" placeholder="Name" [(ngModel)]="userForm.name" #name="ngModel" required
+                    minlength="2" />
+                <div class="field-error" *ngIf="name.invalid && (name.touched || userNgForm.submitted)">
+                    <div *ngIf="name.errors?.['required']">Tên không được để trống.</div>
+                    <div *ngIf="name.errors?.['minlength']">Tên phải có ít nhất 2 ký tự.</div>
+                </div>
+            </div>
+
+            <div>
+                <input type="email" name="email" placeholder="Email" [(ngModel)]="userForm.email" #email="ngModel"
+                    required email />
+                <div class="field-error" *ngIf="email.invalid && (email.touched || userNgForm.submitted)">
+                    <div *ngIf="email.errors?.['required']">Email không được để trống.</div>
+                    <div *ngIf="email.errors?.['email']">Email không đúng định dạng.</div>
+                </div>
+            </div>
+
+            <div>
+                <input type="text" name="role" placeholder="Role" [(ngModel)]="userForm.role" #role="ngModel" required
+                    minlength="2" />
+                <div class="field-error" *ngIf="role.invalid && (role.touched || userNgForm.submitted)">
+                    <div *ngIf="role.errors?.['required']">Role không được để trống.</div>
+                    <div *ngIf="role.errors?.['minlength']">Role phải có ít nhất 2 ký tự.</div>
+                </div>
+            </div>
         </div>
 
         <div class="actions">
-            <button type="submit" class="btn btn-primary" [disabled]="submitting">
+            <button type="submit" class="btn btn-primary" [disabled]="submitting || userNgForm.invalid">
                 {{ submitting ? 'Đang lưu...' : (editingId ? 'Update' : 'Tạo User') }}
             </button>
             <button type="button" class="btn btn-secondary" (click)="resetForm(userNgForm)">Reset</button>

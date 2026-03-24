@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TaskService } from '../../services/task.service';
 import { UserService } from '../../services/user.service';
@@ -129,17 +129,9 @@ export class TaskListComponent implements OnInit {
     });
   }
 
-  submitTask(): void {
-    if (this.submitting) return;
-
-    if (
-      !this.taskForm.title.trim() ||
-      !this.taskForm.status ||
-      !this.taskForm.priority ||
-      !this.taskForm.dueDate
-    ) {
-      this.errorMessage = 'Vui lòng nhập đầy đủ thông tin bắt buộc.';
-      this.successMessage = '';
+  submitTask(form: NgForm): void {
+    if (form.invalid || this.submitting) {
+      form.control.markAllAsTouched();
       this.cdr.detectChanges();
       return;
     }
@@ -168,7 +160,25 @@ export class TaskListComponent implements OnInit {
           ? 'Cập nhật task thành công.'
           : 'Tạo task thành công.';
 
-        this.resetForm();
+        this.editingTaskId = null;
+        this.taskForm = {
+          title: '',
+          description: '',
+          status: 'TODO',
+          priority: 'MEDIUM',
+          dueDate: '',
+          userId: ''
+        };
+
+        form.resetForm({
+          title: '',
+          description: '',
+          status: 'TODO',
+          priority: 'MEDIUM',
+          dueDate: '',
+          userId: ''
+        });
+
         this.submitting = false;
         this.loadTasks();
         this.cdr.detectChanges();
@@ -212,7 +222,15 @@ export class TaskListComponent implements OnInit {
     this.taskService.delete(id).subscribe({
       next: () => {
         if (this.editingTaskId === id) {
-          this.resetForm();
+          this.editingTaskId = null;
+          this.taskForm = {
+            title: '',
+            description: '',
+            status: 'TODO',
+            priority: 'MEDIUM',
+            dueDate: '',
+            userId: ''
+          };
         }
         this.successMessage = 'Xóa task thành công.';
         this.loadTasks();

@@ -10,33 +10,63 @@
 <div class="card">
   <h3>{{ editingTaskId ? 'Cập nhật Task' : 'Tạo Task' }}</h3>
 
-  <form (ngSubmit)="submitTask()">
+  <form #taskNgForm="ngForm" (ngSubmit)="submitTask(taskNgForm)">
     <div class="form-grid">
-      <input type="text" name="title" placeholder="Title" [(ngModel)]="taskForm.title" required />
-      <input type="date" name="dueDate" [(ngModel)]="taskForm.dueDate" />
+      <div>
+        <input type="text" name="title" placeholder="Title" [(ngModel)]="taskForm.title" #title="ngModel" required
+          minlength="3" />
+        <div class="field-error" *ngIf="title.invalid && (title.touched || taskNgForm.submitted)">
+          <div *ngIf="title.errors?.['required']">Title không được để trống.</div>
+          <div *ngIf="title.errors?.['minlength']">Title phải có ít nhất 3 ký tự.</div>
+        </div>
+      </div>
 
-      <select name="userId" [(ngModel)]="taskForm.userId" required>
-        <option value="">-- Select User --</option>
-        <option *ngFor="let user of users" [value]="user.id">{{ user.name }} - {{ user.email }}</option>
-      </select>
+      <div>
+        <input type="date" name="dueDate" [(ngModel)]="taskForm.dueDate" #dueDate="ngModel" required />
+        <div class="field-error" *ngIf="dueDate.invalid && (dueDate.touched || taskNgForm.submitted)">
+          <div *ngIf="dueDate.errors?.['required']">Due date không được để trống.</div>
+        </div>
+      </div>
 
-      <select name="status" [(ngModel)]="taskForm.status">
-        <option value="TODO">TODO</option>
-        <option value="DOING">DOING</option>
-        <option value="DONE">DONE</option>
-      </select>
+      <div>
+        <select name="userId" [(ngModel)]="taskForm.userId" #userId="ngModel" required>
+          <option value="">-- Select User --</option>
+          <option *ngFor="let user of users" [value]="user.id">
+            {{ user.name }} - {{ user.email }}
+          </option>
+        </select>
+        <div class="field-error" *ngIf="userId.invalid && (userId.touched || taskNgForm.submitted)">
+          <div *ngIf="userId.errors?.['required']">Bạn phải chọn user.</div>
+        </div>
+      </div>
 
-      <select name="priority" [(ngModel)]="taskForm.priority">
-        <option value="LOW">LOW</option>
-        <option value="MEDIUM">MEDIUM</option>
-        <option value="HIGH">HIGH</option>
-      </select>
+      <div>
+        <select name="status" [(ngModel)]="taskForm.status" required>
+          <option value="TODO">TODO</option>
+          <option value="DOING">DOING</option>
+          <option value="DONE">DONE</option>
+        </select>
+      </div>
 
-      <textarea name="description" placeholder="Description" [(ngModel)]="taskForm.description"></textarea>
+      <div>
+        <select name="priority" [(ngModel)]="taskForm.priority" required>
+          <option value="LOW">LOW</option>
+          <option value="MEDIUM">MEDIUM</option>
+          <option value="HIGH">HIGH</option>
+        </select>
+      </div>
+
+      <div>
+        <textarea name="description" placeholder="Description" [(ngModel)]="taskForm.description" #description="ngModel"
+          minlength="5"></textarea>
+        <div class="field-error" *ngIf="description.invalid && (description.touched || taskNgForm.submitted)">
+          <div *ngIf="description.errors?.['minlength']">Description phải có ít nhất 5 ký tự nếu nhập.</div>
+        </div>
+      </div>
     </div>
 
     <div class="actions">
-      <button type="submit" class="btn btn-primary" [disabled]="submitting">
+      <button type="submit" class="btn btn-primary" [disabled]="submitting || taskNgForm.invalid">
         {{ submitting ? 'Đang lưu...' : (editingTaskId ? 'Update' : 'Save') }}
       </button>
       <button type="button" class="btn btn-secondary" (click)="resetForm()">Clear</button>

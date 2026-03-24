@@ -18,3 +18,15 @@
   box-shadow: none;
   border-radius: 0;
 }
+
+.field-error {
+  color: #d93025;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched {
+  border: 1px solid #d93025;
+}
