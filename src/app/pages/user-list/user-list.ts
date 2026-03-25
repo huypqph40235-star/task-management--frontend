@@ -20,6 +20,10 @@ export class UserListComponent implements OnInit {
   successMessage = '';
 
   editingId: number | null = null;
+  isUserModalOpen = false;
+
+  isUserDetailModalOpen = false;
+  selectedUser: User | null = null;
 
   userForm = {
     name: '',
@@ -56,6 +60,42 @@ export class UserListComponent implements OnInit {
     });
   }
 
+  openCreateUserModal(): void {
+    this.editingId = null;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.userForm = {
+      name: '',
+      email: '',
+      role: ''
+    };
+    this.isUserModalOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  openEditUserModal(user: User): void {
+    this.edit(user);
+    this.isUserModalOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeUserModal(): void {
+    this.isUserModalOpen = false;
+    this.cdr.detectChanges();
+  }
+
+  openUserDetailModal(user: User): void {
+    this.selectedUser = user;
+    this.isUserDetailModalOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeUserDetailModal(): void {
+    this.isUserDetailModalOpen = false;
+    this.selectedUser = null;
+    this.cdr.detectChanges();
+  }
+
   submit(form: NgForm): void {
     if (form.invalid || this.submitting) {
       form.control.markAllAsTouched();
@@ -87,6 +127,7 @@ export class UserListComponent implements OnInit {
           : 'Tạo user thành công.';
 
         this.resetForm(form);
+        this.isUserModalOpen = false;
         this.submitting = false;
         this.loadUsers();
         this.cdr.detectChanges();
@@ -137,14 +178,24 @@ export class UserListComponent implements OnInit {
     });
   }
 
-  resetForm(form: NgForm): void {
+  resetForm(form?: NgForm): void {
     this.editingId = null;
     this.userForm = {
       name: '',
       email: '',
       role: ''
     };
-    form.resetForm(this.userForm);
+
+    if (form) {
+      form.resetForm(this.userForm);
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  resetAndCloseUserModal(form: NgForm): void {
+    this.resetForm(form);
+    this.isUserModalOpen = false;
     this.cdr.detectChanges();
   }
 

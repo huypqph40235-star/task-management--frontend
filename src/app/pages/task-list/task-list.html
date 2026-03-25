@@ -1,197 +1,219 @@
-<div class="page-header">
+<div class="page-header dashboard-header">
   <div>
     <h1 class="page-title">Tasks</h1>
-    <p class="page-subtitle">
 
-    </p>
+  </div>
+
+  <div class="header-actions">
+
+    <button type="button" class="btn btn-primary" (click)="openCreateTaskModal()">New Task</button>
   </div>
 </div>
 
 <div class="message error" *ngIf="errorMessage">{{ errorMessage }}</div>
 <div class="message success" *ngIf="successMessage">{{ successMessage }}</div>
 
-<section class="panel-card section-card">
-  <div class="section-head">
+<div class="page-section">
+  <section class="panel-card filter-card">
+    <div class="table-toolbar split-toolbar">
+      <div>
+        <h2 class="section-title">Filters</h2>
+
+      </div>
+      <div class="toolbar-actions">
+        <button type="button" class="btn btn-secondary" (click)="resetFilter()">Reset</button>
+        <button type="button" class="btn btn-primary" (click)="applyFilter()">Apply</button>
+      </div>
+    </div>
+
+    <div class="table-wrap filter-wrap">
+      <div class="compact-grid">
+        <div class="col-4">
+          <label class="field-label" for="filterUserId">Assignee</label>
+          <select id="filterUserId" [(ngModel)]="filter.userId" name="filterUserId">
+            <option value="">All users</option>
+            <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
+          </select>
+        </div>
+
+        <div class="col-4">
+          <label class="field-label" for="filterStatus">Status</label>
+          <select id="filterStatus" [(ngModel)]="filter.status" name="filterStatus">
+            <option value="">All status</option>
+            <option value="TODO">TODO</option>
+            <option value="DOING">DOING</option>
+            <option value="DONE">DONE</option>
+          </select>
+        </div>
+
+        <div class="col-4">
+          <label class="field-label" for="filterPriority">Priority</label>
+          <select id="filterPriority" [(ngModel)]="filter.priority" name="filterPriority">
+            <option value="">All priority</option>
+            <option value="LOW">LOW</option>
+            <option value="MEDIUM">MEDIUM</option>
+            <option value="HIGH">HIGH</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel-card form-trigger-card">
+    <div class="table-toolbar split-toolbar form-trigger-toolbar">
+      <div>
+        <h2 class="section-title">Create task</h2>
+
+      </div>
+      <div class="toolbar-actions">
+        <button type="button" class="btn btn-secondary" (click)="openCreateTaskModal()">Open form</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel-card table-card">
+    <div class="table-toolbar split-toolbar">
+      <div>
+        <h2 class="section-title">Task list</h2>
+
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Assignee</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Due date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let task of tasks; trackBy: trackByTaskId">
+            <td>
+              <strong>{{ task.title }}</strong>
+              <div class="muted-text">{{ task.description || 'No description' }}</div>
+            </td>
+            <td>{{ getUserName(task) }}</td>
+            <td>
+              <span class="badge" [ngClass]="task.status.toLowerCase()">{{ task.status }}</span>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="'priority-' + task.priority.toLowerCase()">
+                {{ task.priority }}
+              </span>
+            </td>
+            <td>{{ task.dueDate || '-' }}</td>
+            <td>
+              <div class="inline-actions action-stack">
+                <button type="button" class="btn btn-ghost" (click)="viewDetail(task.id)">View</button>
+                <button type="button" class="btn btn-warning" (click)="openEditTaskModal(task)">Edit</button>
+                <button type="button" class="btn btn-danger" (click)="deleteTask(task.id)">Delete</button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="loading">
+            <td colspan="6" class="empty-text">Đang tải danh sách task...</td>
+          </tr>
+
+          <tr *ngIf="!loading && tasks.length === 0">
+            <td colspan="6" class="empty-text">Không có task nào</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div class="modal-backdrop" *ngIf="isTaskModalOpen" (click)="closeTaskModal()"></div>
+
+<div class="modal-card" *ngIf="isTaskModalOpen">
+  <div class="modal-card-header">
     <div>
-      <h2 class="section-title">Bộ lọc danh sách</h2>
-      <div class="section-note">
+      <h2 class="section-title">{{ editingTaskId ? 'Edit task' : 'Create task' }}</h2>
 
-      </div>
     </div>
-    <div class="toolbar-actions">
-      <button type="button" class="btn btn-primary" (click)="applyFilter()">Áp dụng</button>
-      <button type="button" class="btn btn-secondary" (click)="resetFilter()">Đặt lại</button>
-    </div>
+
+    <button type="button" class="modal-close-btn" (click)="closeTaskModal()">✕</button>
   </div>
 
-  <div class="compact-grid">
-    <div class="col-4">
-      <label class="field-label" for="filterUserId">Người phụ trách</label>
-      <select id="filterUserId" [(ngModel)]="filter.userId" name="filterUserId">
-        <option value="">Tất cả user</option>
-        <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
-      </select>
-    </div>
-
-    <div class="col-4">
-      <label class="field-label" for="filterStatus">Trạng thái</label>
-      <select id="filterStatus" [(ngModel)]="filter.status" name="filterStatus">
-        <option value="">Tất cả trạng thái</option>
-        <option value="TODO">TODO</option>
-        <option value="DOING">DOING</option>
-        <option value="DONE">DONE</option>
-      </select>
-    </div>
-
-    <div class="col-4">
-      <label class="field-label" for="filterPriority">Ưu tiên</label>
-      <select id="filterPriority" [(ngModel)]="filter.priority" name="filterPriority">
-        <option value="">Tất cả mức ưu tiên</option>
-        <option value="LOW">LOW</option>
-        <option value="MEDIUM">MEDIUM</option>
-        <option value="HIGH">HIGH</option>
-      </select>
-    </div>
-  </div>
-</section>
-
-<section class="panel-card section-card">
-  <div class="section-head">
-    <div>
-      <h2 class="section-title">{{ editingTaskId ? 'Chỉnh sửa task' : 'Tạo task mới' }}</h2>
-      <div class="section-note">
-
-      </div>
-    </div>
-  </div>
-
-  <form #taskNgForm="ngForm" (ngSubmit)="submitTask(taskNgForm)">
-    <div class="compact-grid">
-      <div class="col-6">
-        <label class="field-label" for="taskTitle">Tiêu đề</label>
-        <input id="taskTitle" type="text" name="title" placeholder="Nhập tiêu đề task" [(ngModel)]="taskForm.title"
-          #title="ngModel" required minlength="3" />
-        <div class="field-error" *ngIf="title.invalid && (title.touched || taskNgForm.submitted)">
-          <div *ngIf="title.errors?.['required']">Title không được để trống.</div>
-          <div *ngIf="title.errors?.['minlength']">Title phải có ít nhất 3 ký tự.</div>
+  <div class="modal-card-body">
+    <form #taskNgForm="ngForm" (ngSubmit)="submitTask(taskNgForm)">
+      <div class="compact-grid">
+        <div class="col-6">
+          <label class="field-label" for="taskTitle">Title</label>
+          <input id="taskTitle" type="text" name="title" placeholder="Enter task title" [(ngModel)]="taskForm.title"
+            #title="ngModel" required minlength="3" />
+          <div class="field-error" *ngIf="title.invalid && (title.touched || taskNgForm.submitted)">
+            <div *ngIf="title.errors?.['required']">Title không được để trống.</div>
+            <div *ngIf="title.errors?.['minlength']">Title phải có ít nhất 3 ký tự.</div>
+          </div>
         </div>
-      </div>
 
-      <div class="col-3">
-        <label class="field-label" for="taskDueDate">Hạn hoàn thành</label>
-        <input id="taskDueDate" type="date" name="dueDate" [(ngModel)]="taskForm.dueDate" #dueDate="ngModel" required />
-        <div class="field-error" *ngIf="dueDate.invalid && (dueDate.touched || taskNgForm.submitted)">
-          <div *ngIf="dueDate.errors?.['required']">Due date không được để trống.</div>
+        <div class="col-3">
+          <label class="field-label" for="taskDueDate">Due date</label>
+          <input id="taskDueDate" type="date" name="dueDate" [(ngModel)]="taskForm.dueDate" #dueDate="ngModel"
+            required />
+          <div class="field-error" *ngIf="dueDate.invalid && (dueDate.touched || taskNgForm.submitted)">
+            <div *ngIf="dueDate.errors?.['required']">Due date không được để trống.</div>
+          </div>
         </div>
-      </div>
 
-      <div class="col-3">
-        <label class="field-label" for="taskUserId">Người phụ trách</label>
-        <select id="taskUserId" name="userId" [(ngModel)]="taskForm.userId" #userId="ngModel" required>
-          <option value="">Chọn user</option>
-          <option *ngFor="let user of users" [value]="user.id">
-            {{ user.name }} - {{ user.email }}
-          </option>
-        </select>
-        <div class="field-error" *ngIf="userId.invalid && (userId.touched || taskNgForm.submitted)">
-          <div *ngIf="userId.errors?.['required']">Bạn phải chọn user.</div>
+        <div class="col-3">
+          <label class="field-label" for="taskUserId">Assignee</label>
+          <select id="taskUserId" name="userId" [(ngModel)]="taskForm.userId" #userId="ngModel" required>
+            <option value="">Choose user</option>
+            <option *ngFor="let user of users" [value]="user.id">
+              {{ user.name }} - {{ user.email }}
+            </option>
+          </select>
+          <div class="field-error" *ngIf="userId.invalid && (userId.touched || taskNgForm.submitted)">
+            <div *ngIf="userId.errors?.['required']">Bạn phải chọn user.</div>
+          </div>
         </div>
-      </div>
 
-      <div class="col-3">
-        <label class="field-label" for="taskStatus">Trạng thái</label>
-        <select id="taskStatus" name="status" [(ngModel)]="taskForm.status" required>
-          <option value="TODO">TODO</option>
-          <option value="DOING">DOING</option>
-          <option value="DONE">DONE</option>
-        </select>
-      </div>
+        <div class="col-3">
+          <label class="field-label" for="taskStatus">Status</label>
+          <select id="taskStatus" name="status" [(ngModel)]="taskForm.status" required>
+            <option value="TODO">TODO</option>
+            <option value="DOING">DOING</option>
+            <option value="DONE">DONE</option>
+          </select>
+        </div>
 
-      <div class="col-3">
-        <label class="field-label" for="taskPriority">Ưu tiên</label>
-        <select id="taskPriority" name="priority" [(ngModel)]="taskForm.priority" required>
-          <option value="LOW">LOW</option>
-          <option value="MEDIUM">MEDIUM</option>
-          <option value="HIGH">HIGH</option>
-        </select>
-      </div>
+        <div class="col-3">
+          <label class="field-label" for="taskPriority">Priority</label>
+          <select id="taskPriority" name="priority" [(ngModel)]="taskForm.priority" required>
+            <option value="LOW">LOW</option>
+            <option value="MEDIUM">MEDIUM</option>
+            <option value="HIGH">HIGH</option>
+          </select>
+        </div>
 
-      <div class="col-6">
-        <label class="field-label" for="taskDescription">Mô tả</label>
-        <textarea id="taskDescription" name="description" placeholder="Nhập mô tả ngắn gọn"
-          [(ngModel)]="taskForm.description" #description="ngModel" minlength="5"></textarea>
-        <div class="field-error" *ngIf="description.invalid && (description.touched || taskNgForm.submitted)">
-          <div *ngIf="description.errors?.['minlength']">
-            Description phải có ít nhất 5 ký tự nếu nhập.
+        <div class="col-6">
+          <label class="field-label" for="taskDescription">Description</label>
+          <textarea id="taskDescription" name="description" placeholder="Enter a short description"
+            [(ngModel)]="taskForm.description" #description="ngModel" minlength="5"></textarea>
+          <div class="field-error" *ngIf="description.invalid && (description.touched || taskNgForm.submitted)">
+            <div *ngIf="description.errors?.['minlength']">
+              Description phải có ít nhất 5 ký tự nếu nhập.
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="form-actions" style="margin-top: 18px;">
-      <button type="submit" class="btn btn-primary" [disabled]="submitting || taskNgForm.invalid">
-        {{ submitting ? 'Đang lưu...' : (editingTaskId ? 'Cập nhật task' : 'Tạo task') }}
-      </button>
-      <button type="button" class="btn btn-secondary" (click)="resetForm()">Làm mới form</button>
-    </div>
-  </form>
-</section>
-
-<section class="panel-card table-card">
-  <div class="table-toolbar">
-    <div>
-      <h2 class="section-title">Danh sách task</h2>
-      <div class="section-note">
-
+      <div class="form-actions form-actions-spaced">
+        <button type="button" class="btn btn-secondary" (click)="resetAndCloseTaskModal()">
+          Reset form
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="submitting || taskNgForm.invalid">
+          {{ submitting ? 'Đang lưu...' : (editingTaskId ? 'Update task' : 'Create task') }}
+        </button>
       </div>
-    </div>
+    </form>
   </div>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Task</th>
-          <th>Assignee</th>
-          <th>Status</th>
-          <th>Priority</th>
-          <th>Due date</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let task of tasks; trackBy: trackByTaskId">
-          <td>
-            <strong>{{ task.title }}</strong>
-            <div class="muted-text">{{ task.description || 'No description' }}</div>
-          </td>
-          <td>{{ getUserName(task) }}</td>
-          <td>
-            <span class="badge" [ngClass]="task.status.toLowerCase()">{{ task.status }}</span>
-          </td>
-          <td>
-            <span class="badge" [ngClass]="'priority-' + task.priority.toLowerCase()">
-              {{ task.priority }}
-            </span>
-          </td>
-          <td>{{ task.dueDate || '-' }}</td>
-          <td>
-            <div class="inline-actions">
-              <button type="button" class="btn btn-info" (click)="viewDetail(task.id)">View</button>
-              <button type="button" class="btn btn-warning" (click)="editTask(task)">Edit</button>
-              <button type="button" class="btn btn-danger" (click)="deleteTask(task.id)">Delete</button>
-            </div>
-          </td>
-        </tr>
-
-        <tr *ngIf="loading">
-          <td colspan="6" class="empty-text">Đang tải danh sách task...</td>
-        </tr>
-
-        <tr *ngIf="!loading && tasks.length === 0">
-          <td colspan="6" class="empty-text">Không có task nào</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
+</div>

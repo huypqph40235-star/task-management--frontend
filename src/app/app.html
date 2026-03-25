@@ -1,20 +1,18 @@
 <div class="app-shell">
-  <header class="app-topbar">
-    <div class="brand-block">
-      <div class="brand-mark">TM</div>
-      <div>
-        <div class="brand-title">Task Management</div>
+  <aside class="app-sidebar">
 
-      </div>
-    </div>
 
-    <nav class="app-nav">
+    <nav class="sidebar-nav">
       <a routerLink="/tasks" routerLinkActive="active-link">Tasks</a>
       <a routerLink="/users" routerLinkActive="active-link">Users</a>
     </nav>
-  </header>
+  </aside>
 
-  <main class="app-content">
-    <router-outlet></router-outlet>
-  </main>
+  <div class="app-main">
+
+
+    <main class="app-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </div>

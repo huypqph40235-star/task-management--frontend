@@ -33,6 +33,7 @@ export class TaskListComponent implements OnInit {
   successMessage = '';
 
   editingTaskId: number | null = null;
+  isTaskModalOpen = false;
 
   filter = {
     userId: '',
@@ -131,6 +132,25 @@ export class TaskListComponent implements OnInit {
     });
   }
 
+  openCreateTaskModal(): void {
+    this.resetForm();
+    this.successMessage = '';
+    this.errorMessage = '';
+    this.isTaskModalOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  openEditTaskModal(task: Task): void {
+    this.editTask(task);
+    this.isTaskModalOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeTaskModal(): void {
+    this.isTaskModalOpen = false;
+    this.cdr.detectChanges();
+  }
+
   submitTask(form: NgForm): void {
     if (form.invalid || this.submitting) {
       form.control.markAllAsTouched();
@@ -162,25 +182,8 @@ export class TaskListComponent implements OnInit {
           ? 'Cập nhật task thành công.'
           : 'Tạo task thành công.';
 
-        this.editingTaskId = null;
-        this.taskForm = {
-          title: '',
-          description: '',
-          status: 'TODO',
-          priority: 'MEDIUM',
-          dueDate: '',
-          userId: ''
-        };
-
-        form.resetForm({
-          title: '',
-          description: '',
-          status: 'TODO',
-          priority: 'MEDIUM',
-          dueDate: '',
-          userId: ''
-        });
-
+        this.resetForm(form);
+        this.isTaskModalOpen = false;
         this.submitting = false;
         this.loadTasks();
         this.cdr.detectChanges();
@@ -224,15 +227,8 @@ export class TaskListComponent implements OnInit {
     this.taskService.delete(id).subscribe({
       next: () => {
         if (this.editingTaskId === id) {
-          this.editingTaskId = null;
-          this.taskForm = {
-            title: '',
-            description: '',
-            status: 'TODO',
-            priority: 'MEDIUM',
-            dueDate: '',
-            userId: ''
-          };
+          this.resetForm();
+          this.isTaskModalOpen = false;
         }
 
         this.successMessage = 'Xóa task thành công.';
@@ -252,7 +248,7 @@ export class TaskListComponent implements OnInit {
     this.router.navigate(['/tasks', id]);
   }
 
-  resetForm(): void {
+  resetForm(form?: NgForm): void {
     this.editingTaskId = null;
     this.taskForm = {
       title: '',
@@ -262,6 +258,24 @@ export class TaskListComponent implements OnInit {
       dueDate: '',
       userId: ''
     };
+
+    if (form) {
+      form.resetForm({
+        title: '',
+        description: '',
+        status: 'TODO',
+        priority: 'MEDIUM',
+        dueDate: '',
+        userId: ''
+      });
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  resetAndCloseTaskModal(form?: NgForm): void {
+    this.resetForm(form);
+    this.isTaskModalOpen = false;
     this.cdr.detectChanges();
   }
 

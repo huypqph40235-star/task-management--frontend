@@ -1,104 +1,188 @@
-<div class="page-header">
+<div class="page-header dashboard-header">
     <div>
         <h1 class="page-title">Users</h1>
-        <p class="page-subtitle">
 
-        </p>
+    </div>
+
+    <div class="header-actions">
+
+        <button type="button" class="btn btn-primary" (click)="openCreateUserModal()">New User</button>
     </div>
 </div>
 
 <div class="message error" *ngIf="errorMessage">{{ errorMessage }}</div>
 <div class="message success" *ngIf="successMessage">{{ successMessage }}</div>
 
-<section class="panel-card section-card">
-    <div class="section-head">
+<div class="page-section">
+    <section class="panel-card form-trigger-card">
+        <div class="table-toolbar split-toolbar form-trigger-toolbar">
+            <div>
+                <h2 class="section-title">Thêm user</h2>
+
+            </div>
+            <div class="toolbar-actions">
+                <button type="button" class="btn btn-secondary" (click)="openCreateUserModal()">Open form</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel-card table-card">
+        <div class="table-toolbar split-toolbar">
+            <div>
+                <h2 class="section-title">User list</h2>
+
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let user of users; trackBy: trackByUserId">
+                        <td>
+                            <div class="user-name-cell">
+                                <span class="user-avatar">{{ (user.name || '?').charAt(0) }}</span>
+                                <div>
+                                    <strong>{{ user.name }}</strong>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <span class="badge role-badge">{{ user.role }}</span>
+                        </td>
+                        <td>
+                            <div class="inline-actions action-stack">
+                                <button type="button" class="btn btn-ghost"
+                                    (click)="openUserDetailModal(user)">Detail</button>
+                                <button type="button" class="btn btn-warning"
+                                    (click)="openEditUserModal(user)">Edit</button>
+                                <button type="button" class="btn btn-danger" (click)="delete(user.id)">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr *ngIf="loading">
+                        <td colspan="4" class="empty-text">Đang tải danh sách user...</td>
+                    </tr>
+
+                    <tr *ngIf="!loading && users.length === 0">
+                        <td colspan="4" class="empty-text">Không có user nào</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<!-- Modal create/edit -->
+<div class="modal-backdrop" *ngIf="isUserModalOpen" (click)="closeUserModal()"></div>
+
+<div class="modal-card" *ngIf="isUserModalOpen">
+    <div class="modal-card-header">
         <div>
-            <h2 class="section-title">{{ editingId ? 'Chỉnh sửa người dùng' : 'Tạo người dùng mới' }}</h2>
+            <h2 class="section-title">{{ editingId ? 'Edit user' : 'Create user' }}</h2>
 
         </div>
+
+        <button type="button" class="modal-close-btn" (click)="closeUserModal()">✕</button>
     </div>
 
-    <form #userNgForm="ngForm" (ngSubmit)="submit(userNgForm)">
-        <div class="compact-grid">
-            <div class="col-4">
-                <label class="field-label" for="userName">Tên</label>
-                <input id="userName" type="text" name="name" placeholder="Nhập tên người dùng"
-                    [(ngModel)]="userForm.name" #name="ngModel" required minlength="2" />
-                <div class="field-error" *ngIf="name.invalid && (name.touched || userNgForm.submitted)">
-                    <div *ngIf="name.errors?.['required']">Tên không được để trống.</div>
-                    <div *ngIf="name.errors?.['minlength']">Tên phải có ít nhất 2 ký tự.</div>
+    <div class="modal-card-body">
+        <form #userNgForm="ngForm" (ngSubmit)="submit(userNgForm)">
+            <div class="compact-grid">
+                <div class="col-4">
+                    <label class="field-label" for="userName">Name</label>
+                    <input id="userName" type="text" name="name" placeholder="Enter full name"
+                        [(ngModel)]="userForm.name" #name="ngModel" required minlength="2" />
+                    <div class="field-error" *ngIf="name.invalid && (name.touched || userNgForm.submitted)">
+                        <div *ngIf="name.errors?.['required']">Tên không được để trống.</div>
+                        <div *ngIf="name.errors?.['minlength']">Tên phải có ít nhất 2 ký tự.</div>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <label class="field-label" for="userEmail">Email</label>
+                    <input id="userEmail" type="email" name="email" placeholder="Enter email"
+                        [(ngModel)]="userForm.email" #email="ngModel" required email />
+                    <div class="field-error" *ngIf="email.invalid && (email.touched || userNgForm.submitted)">
+                        <div *ngIf="email.errors?.['required']">Email không được để trống.</div>
+                        <div *ngIf="email.errors?.['email']">Email không đúng định dạng.</div>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <label class="field-label" for="userRole">Role</label>
+                    <input id="userRole" type="text" name="role" placeholder="Enter role" [(ngModel)]="userForm.role"
+                        #role="ngModel" required minlength="2" />
+                    <div class="field-error" *ngIf="role.invalid && (role.touched || userNgForm.submitted)">
+                        <div *ngIf="role.errors?.['required']">Role không được để trống.</div>
+                        <div *ngIf="role.errors?.['minlength']">Role phải có ít nhất 2 ký tự.</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="col-4">
-                <label class="field-label" for="userEmail">Email</label>
-                <input id="userEmail" type="email" name="email" placeholder="Nhập email" [(ngModel)]="userForm.email"
-                    #email="ngModel" required email />
-                <div class="field-error" *ngIf="email.invalid && (email.touched || userNgForm.submitted)">
-                    <div *ngIf="email.errors?.['required']">Email không được để trống.</div>
-                    <div *ngIf="email.errors?.['email']">Email không đúng định dạng.</div>
-                </div>
+            <div class="form-actions form-actions-spaced">
+                <button type="button" class="btn btn-secondary" (click)="resetAndCloseUserModal(userNgForm)">
+                    Reset form
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="submitting || userNgForm.invalid">
+                    {{ submitting ? 'Đang lưu...' : (editingId ? 'Update user' : 'Create user') }}
+                </button>
             </div>
+        </form>
+    </div>
+</div>
 
-            <div class="col-4">
-                <label class="field-label" for="userRole">Vai trò</label>
-                <input id="userRole" type="text" name="role" placeholder="Nhập role" [(ngModel)]="userForm.role"
-                    #role="ngModel" required minlength="2" />
-                <div class="field-error" *ngIf="role.invalid && (role.touched || userNgForm.submitted)">
-                    <div *ngIf="role.errors?.['required']">Role không được để trống.</div>
-                    <div *ngIf="role.errors?.['minlength']">Role phải có ít nhất 2 ký tự.</div>
-                </div>
-            </div>
-        </div>
+<!-- Modal detail -->
+<div class="modal-backdrop" *ngIf="isUserDetailModalOpen" (click)="closeUserDetailModal()"></div>
 
-        <div class="form-actions" style="margin-top: 18px;">
-            <button type="submit" class="btn btn-primary" [disabled]="submitting || userNgForm.invalid">
-                {{ submitting ? 'Đang lưu...' : (editingId ? 'Cập nhật user' : 'Tạo user') }}
-            </button>
-            <button type="button" class="btn btn-secondary" (click)="resetForm(userNgForm)">Làm mới form</button>
-        </div>
-    </form>
-</section>
-
-<section class="panel-card table-card">
-    <div class="table-toolbar">
+<div class="modal-card modal-card-detail" *ngIf="isUserDetailModalOpen">
+    <div class="modal-card-header">
         <div>
-            <h2 class="section-title">Danh sách user</h2>
+            <h2 class="section-title">User detail</h2>
 
         </div>
+
+        <button type="button" class="modal-close-btn" (click)="closeUserDetailModal()">✕</button>
     </div>
 
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let user of users; trackBy: trackByUserId">
-                    <td>{{ user.name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.role }}</td>
-                    <td>
-                        <div class="inline-actions">
-                            <button type="button" class="btn btn-warning" (click)="edit(user)">Edit</button>
-                            <button type="button" class="btn btn-danger" (click)="delete(user.id)">Delete</button>
-                        </div>
-                    </td>
-                </tr>
+    <div class="modal-card-body">
+        <div class="detail-hero">
+            <div class="detail-avatar">{{ (selectedUser?.name || '?').charAt(0) }}</div>
+            <div>
+                <h3 class="detail-hero-name">{{ selectedUser?.name || '-' }}</h3>
+                <div class="detail-hero-subtitle">{{ selectedUser?.email || '-' }}</div>
+            </div>
+        </div>
 
-                <tr *ngIf="loading">
-                    <td colspan="4" class="empty-text">Đang tải danh sách user...</td>
-                </tr>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="detail-label">ID</span>
+                <div class="detail-value">{{ selectedUser?.id || '-' }}</div>
+            </div>
 
-                <tr *ngIf="!loading && users.length === 0">
-                    <td colspan="4" class="empty-text">Không có user nào</td>
-                </tr>
-            </tbody>
-        </table>
+            <div class="detail-item">
+                <span class="detail-label">Role</span>
+                <div class="detail-value">{{ selectedUser?.role || '-' }}</div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Name</span>
+                <div class="detail-value">{{ selectedUser?.name || '-' }}</div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Email</span>
+                <div class="detail-value">{{ selectedUser?.email || '-' }}</div>
+            </div>
+        </div>
     </div>
-</section>
+</div>
